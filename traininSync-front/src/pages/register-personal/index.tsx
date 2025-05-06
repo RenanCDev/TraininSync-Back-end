@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Button } from "../../components/button";
+import { Button } from '../../components/button';
 import { NavBar } from "../../components/navbar";
 import { getAllPersonal } from "../../api/personal/getPersonal";
 import { CreatePersonal } from "./zod";
