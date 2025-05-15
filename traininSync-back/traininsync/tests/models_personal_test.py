@@ -1,37 +1,55 @@
 from django.test import TestCase
-from ..models import Personal, Pessoa, DadosBancarios
+from datetime import date
+from ..models import Pessoa, Personal, DadosBancarios
 
-class PersonalTestCase(TestCase):
+class PersonalModelTestCase(TestCase):
     def setUp(self):
-        # First create DadosBancarios
-        dados_bancarios = DadosBancarios.objects.create(
-            numero_conta='987654',
-            agencia='5678'
+        self.dados_bancarios = DadosBancarios.objects.create(
+            numero_conta="12345-6",
+            agencia="0001"
         )
-        
-        # Create Personal with all fields at once
+        self.pessoa_data = {
+            "nome": "Carlos Souza",
+            "cpf": "12345678900",
+            "data_de_nascimento": date(1988, 10, 20),
+            "email": "carlos@example.com",
+            "numero_de_celular": "11977776666",
+            "sexo": "M",
+            "etnia": "branco",
+            "estado_civil": "casado"
+        }
         self.personal = Personal.objects.create(
-            nome='Teste Personal',
-            data_de_nascimento='1980-01-01',
-            cpf='12312312312',
-            email='personal@example.com',
-            numero_de_celular='11987651234',
-            sexo='M',
-            etnia='preta',
-            estado_civil='casado',
-            cref='CREF789',
-            especialidades='Crossfit',
-            experiencia_profissional='7 anos',
-            dados_bancarios=dados_bancarios,
-            horarios_disponiveis=12.0,
-            locais_disponiveis='Box Crossfit'
+            dados_bancarios=self.dados_bancarios,
+            status=True,
+            cref="012345-G/SP",
+            especialidades="Musculação, Funcional",
+            experiencia_profissional="5 anos",
+            horarios_disponiveis=20.5,
+            locais_disponiveis="Academia A, Parque B",
+            **self.pessoa_data
         )
 
-    def test_personal_creation(self):
-        # Refresh to ensure all fields are loaded
-        self.personal.refresh_from_db()
-        
-        # Test the fields
-        self.assertEqual(self.personal.nome, 'Teste Personal')
-        self.assertEqual(self.personal.cref, 'CREF789')
-        self.assertEqual(self.personal.dados_bancarios.numero_conta, '987654')
+    def test_criar_personal(self):
+        self.assertEqual(self.personal.nome, "Carlos Souza")
+        self.assertTrue(self.personal.status)
+        self.assertEqual(self.personal.cref, "012345-G/SP")
+        self.assertEqual(self.personal.especialidades, "Musculação, Funcional")
+
+    def test_ativar_personal(self):
+        self.personal.reativar_personal()
+        personal_db = Personal.objects.get(id=self.personal.id)
+        self.assertTrue(personal_db.status)
+
+    def test_desativar_personal(self):
+        self.personal.desativar_personal()
+        personal_db = Personal.objects.get(id=self.personal.id)
+        self.assertFalse(personal_db.status)
+
+    @classmethod
+    def consultar_por_cpf(cls, cpf):
+        return Personal.consultar_por_cpf(cpf)
+
+    def test_consultar_por_cpf(self):
+        personal = PersonalModelTestCase.consultar_por_cpf("12345678900")
+        self.assertIsNotNone(personal)
+        self.assertEqual(personal.id, self.personal.id)
