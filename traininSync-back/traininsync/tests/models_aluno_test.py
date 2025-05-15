@@ -5,7 +5,7 @@ from ..models import Pessoa, Aluno
 class AlunoModelTestCase(TestCase):
     def setUp(self):
         self.pessoa = Pessoa.objects.create(
-            nome="Maria Oliveira",
+            nome="Jose Alves",
             cpf="98765432100",
             data_de_nascimento=date(1992, 5, 15),
             email="maria@example.com",
