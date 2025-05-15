@@ -1,31 +1,53 @@
 from django.test import TestCase
 from datetime import date, time
-from ..models import Aluno, Pessoa
+from ..models import Pessoa, Aluno
 
-class AlunoTestCase(TestCase):
+class AlunoModelTestCase(TestCase):
     def setUp(self):
-        pessoa = Pessoa.objects.create(
-            nome='Teste Aluno',
-            data_de_nascimento='2000-01-01',
-            cpf='12345678902',
-            email='aluno@example.com',
-            numero_de_celular='11987654322',
-            sexo='M',
-            etnia='branca',
-            estado_civil='solteiro'
+        self.pessoa = Pessoa.objects.create(
+            nome="Maria Oliveira",
+            cpf="98765432100",
+            data_de_nascimento=date(1992, 5, 15),
+            email="maria@example.com",
+            numero_de_celular="11988887777",
+            sexo="F",
+            etnia="parda",
+            estado_civil="solteira"
         )
         self.aluno = Aluno.objects.create(
-            pessoa=pessoa,
+            pessoa=self.pessoa,
+            bioimpedancia="BIO123",
             altura=1.70,
-            peso=70.0,
-            idade=25,
-            bioimpedancia='BIO123',
-            sexo='M',
-            data_do_Exame='2023-01-01',
-            hora_do_Exame='10:00:00'
+            data_do_exame=date.today(),
+            hora_do_exame=time(9, 30),
+            peso=65.0,
+            status=True
         )
 
-    def test_aluno_creation(self):
-        self.assertEqual(self.aluno.pessoa.nome, 'Teste Aluno')
+    def test_criar_aluno(self):
+        self.assertEqual(self.aluno.pessoa.nome, "Maria Oliveira")
+        self.assertEqual(self.aluno.bioimpedancia, "BIO123")
         self.assertEqual(self.aluno.altura, 1.70)
-        self.assertEqual(self.aluno.idade, 25)
+        self.assertEqual(self.aluno.peso, 65.0)
+        self.assertTrue(self.aluno.status)
+
+    def test_ativar_aluno(self):
+        self.aluno.status = True
+        self.aluno.save()
+        aluno_db = Aluno.objects.get(id=self.aluno.id)
+        self.assertTrue(aluno_db.status)
+
+    def test_desativar_aluno(self):
+        self.aluno.status = False
+        self.aluno.save()
+        aluno_db = Aluno.objects.get(id=self.aluno.id)
+        self.assertFalse(aluno_db.status)
+
+    @classmethod
+    def consultar_por_cpf(cls, cpf):
+        return Aluno.objects.filter(pessoa__cpf=cpf).first()
+
+    def test_consultar_por_cpf(self):
+        aluno = AlunoModelTestCase.consultar_por_cpf("98765432100")
+        self.assertIsNotNone(aluno)
+        self.assertEqual(aluno.id, self.aluno.id)

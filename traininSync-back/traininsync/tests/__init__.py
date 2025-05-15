@@ -1,9 +1,9 @@
-from .models_aluno_test import AlunoTestCase #OK
-from .models_personal_test import PersonalTestCase #OK
-from .models_agenda_test import AgendaTestCase #NAORODA
-from .models_contrato_de_servico_test import ContratoDeServicoTestCase #OK
-from .models_servico_test import ServicoTestCase #OK
-from .models_dados_bancarios_test import DadosBancariosTestCase #OK
-from .models_pessoa_test import PessoaTestCase #OK
-from .models_pagamento_test import PagamentoTestCase #OK
-from .models_registro_de_progresso_test import RegistroDeProgressoTestCase #NAORODA
+from .models_aluno_test import AlunoModelTestCase
+from .models_personal_test import PersonalModelTestCase
+from .models_agenda_test import AgendaTestCase
+from .models_dados_bancarios_test import DadosBancariosTestCase
+from .models_servico_test import ServicoTestCase
+from .models_pagamento_test import PagamentoTestCase
+from .models_pessoa_test import PessoaTestCase
+from .models_registro_de_progresso_test import RegistroDeProgressoTestCase
+from .models_contrato_de_servico_test import ContratoDeServicoTestCase

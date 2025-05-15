@@ -67,7 +67,7 @@ class Pessoa(models.Model):
 
     nome = models.CharField(max_length=255)
     cpf = models.CharField(max_length=11, unique=True, validators=[validar_cpf])
-    data_de_nascimento = models.DateField(blank=True, null=True)
+    data_de_nascimento = models.DateField()
     email = models.EmailField(unique=True)
     numero_de_celular = models.CharField(max_length=11, validators=[celular_validator])
     sexo = models.CharField(max_length=1, choices=SEXO_CHOICES)
@@ -130,7 +130,8 @@ class Personal(Pessoa):
     def consultar_por_cpf(cls, cpf):
         """Consulta um personal pelo CPF."""
         return cls.objects.filter(cpf=cpf).first()
-      
+
+
 class Aluno(models.Model):
     """Modelo que representa um aluno com dados de exame."""
 
