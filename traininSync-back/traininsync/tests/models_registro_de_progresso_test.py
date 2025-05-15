@@ -1,42 +1,60 @@
 from django.test import TestCase
 from datetime import date
-from ..models import Pessoa, RegistroDeProgresso, Aluno
+from ..models import RegistroDeProgresso, Aluno, Pessoa
 
 class RegistroDeProgressoTestCase(TestCase):
     def setUp(self):
-        pessoa = Pessoa.objects.create(
-            nome="João Silva",
+        self.pessoa = Pessoa.objects.create(
+            nome="Carlos Souza",
             cpf="12345678909",
-            data_de_nascimento="2000-01-01",
-            email="joao@example.com",
-            numero_de_celular="11999999999",
+            data_de_nascimento=date(1985, 5, 20),
+            email="carlos@example.com",
+            numero_de_celular="11988888888",
             sexo="M",
             etnia="branca",
-            estado_civil="solteiro"
+            estado_civil="casado"
         )
         self.aluno = Aluno.objects.create(
-            pessoa=pessoa,
-            bioimpedancia="BIO123",
-            altura=1.80,
-            idade=25,
-            sexo="M",
-            data_do_Exame="2025-01-01",
-            hora_do_Exame="10:00:00",
+            pessoa=self.pessoa,
+            bioimpedancia="BIO1234567890",
+            altura=1.75,
+            data_do_exame=date.today(),
+            hora_do_exame="08:00",
+            peso=75.0
+        )
+        self.registro = RegistroDeProgresso.objects.create(
+            aluno=self.aluno,
+            data=date.today(),
+            altura=1.75,
             peso=75.0
         )
 
-    def test_create_registro_de_progresso(self):
-        registro = RegistroDeProgresso.objects.create(
+    def test_criar_registro(self):
+        self.assertEqual(self.registro.aluno.pessoa.nome, "Carlos Souza")
+        self.assertEqual(self.registro.altura, 1.75)
+        self.assertEqual(self.registro.peso, 75.0)
+
+    def test_desativar_registro(self):
+        self.registro.delete()
+        registro_db = RegistroDeProgresso.objects.filter(id=self.registro.id).first()
+        self.assertIsNone(registro_db)
+
+    def test_ativar_registro(self):
+        novo_registro = RegistroDeProgresso.objects.create(
             aluno=self.aluno,
             data=date.today(),
-            massa_gorda=15.0,
-            massa_magra=60.0,
-            massa_muscular=50.0,
-            hidratacao=60.0,
-            densidade_ossea=3.0,
-            gordura_visceral=10.0,
-            taxa_de_metabolismo_basal=1500.0,
             altura=1.80,
-            peso=75.0
+            peso=80.0
         )
-        self.assertEqual(str(registro), f"{self.aluno.pessoa.nome} - {registro.data}")
+        self.assertIsNotNone(novo_registro)
+        self.assertEqual(novo_registro.altura, 1.80)
+        self.assertEqual(novo_registro.peso, 80.0)
+
+    @classmethod
+    def consultar_por_aluno(cls, aluno_id):
+        return RegistroDeProgresso.objects.filter(aluno__id=aluno_id).first()
+
+    def test_consultar_por_aluno(self):
+        registro = RegistroDeProgressoTestCase.consultar_por_aluno(self.aluno.id)
+        self.assertIsNotNone(registro)
+        self.assertEqual(registro.id, self.registro.id)
