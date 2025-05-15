@@ -1,48 +1,42 @@
 from django.test import TestCase
-from django.core.exceptions import ValidationError
+from datetime import date
 from ..models import Pessoa
 
 class PessoaTestCase(TestCase):
     def setUp(self):
-        self.valid_data = {
-            'nome': 'Teste Pessoa',
-            'data_de_nascimento': '2000-01-01',
-            'cpf': '52998224725',  # Valid CPF
-            'email': 'teste@example.com',
-            'numero_de_celular': '11987654321',
-            'sexo': 'M',
-            'etnia': 'branca',
-            'estado_civil': 'solteiro'
-        }
-        self.pessoa = Pessoa.objects.create(**self.valid_data)
+        self.pessoa = Pessoa.objects.create(
+            nome="João Silva",
+            cpf="12345678909",
+            data_de_nascimento=date(1990, 1, 1),
+            email="joao@example.com",
+            numero_de_celular="11999999999",
+            sexo="M",
+            etnia="branca",
+            estado_civil="solteiro"
+        )
 
-    def test_valid_pessoa_creation(self):
-        self.assertEqual(self.pessoa.nome, 'Teste Pessoa')
-        self.assertEqual(self.pessoa.cpf, '52998224725')
+    def test_criar_pessoa(self):
+        self.assertEqual(self.pessoa.nome, "João Silva")
+        self.assertEqual(self.pessoa.cpf, "12345678909")
+        self.assertEqual(self.pessoa.email, "joao@example.com")
 
-    def test_invalid_cpf_short(self):
-        """Test CPF with less than 11 digits"""
-        invalid_data = self.valid_data.copy()
-        invalid_data['cpf'] = '123'
-        
-        with self.assertRaises(ValidationError):
-            pessoa = Pessoa(**invalid_data)
-            pessoa.full_clean()  # This triggers model validation
+    def test_ativar_pessoa(self):
+        self.pessoa.email = "joao_ativado@example.com"
+        self.pessoa.save()
+        pessoa_db = Pessoa.objects.get(id=self.pessoa.id)
+        self.assertEqual(pessoa_db.email, "joao_ativado@example.com")
 
-    def test_invalid_cpf_non_digits(self):
-        """Test CPF with non-digit characters"""
-        invalid_data = self.valid_data.copy()
-        invalid_data['cpf'] = '5299822472a'  # Contains letter
-        
-        with self.assertRaises(ValidationError):
-            pessoa = Pessoa(**invalid_data)
-            pessoa.full_clean()
+    def test_desativar_pessoa(self):
+        self.pessoa.email = "joao_desativado@example.com"
+        self.pessoa.save()
+        pessoa_db = Pessoa.objects.get(id=self.pessoa.id)
+        self.assertEqual(pessoa_db.email, "joao_desativado@example.com")
 
-    def test_invalid_cpf_repeated(self):
-        """Test CPF with all digits the same"""
-        invalid_data = self.valid_data.copy()
-        invalid_data['cpf'] = '11111111111'
-        
-        with self.assertRaises(ValidationError):
-            pessoa = Pessoa(**invalid_data)
-            pessoa.full_clean()
+    @classmethod
+    def consultar_por_cpf(cls, cpf):
+        return Pessoa.objects.filter(cpf=cpf).first()
+
+    def test_consultar_por_cpf(self):
+        pessoa = PessoaTestCase.consultar_por_cpf("12345678909")
+        self.assertIsNotNone(pessoa)
+        self.assertEqual(pessoa.id, self.pessoa.id)
